@@ -1,9 +1,7 @@
-var async = require('async')
+var W = require('./')
   , fs = require('fs')
 
-require('./')
-
-async.w(function (cb) {
+W(function (cb) {
     cb(null, '/tmp')
 }).then(function (dir, cb) {
     fs.readdir(dir, cb)

@@ -2,7 +2,7 @@
 
 var async = require('async')
 
-async.w = function waterfallHelper(fn) {
+module.exports = function waterfallHelper(fn) {
     var obj = {
         tasks: [fn],
         then: function (fn) {

@@ -1,14 +1,14 @@
 {
-  "name": "async-waterfall-helper",
-  "version": "0.0.1",
-  "description": "Promise like syntax for async.waterfall",
+  "name": "async-wh",
+  "version": "0.0.2",
+  "description": "Promise-like syntax for async.waterfall",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/baverman/async-waterfall-helper.git"
+    "url": "git://github.com/baverman/async-wh.git"
   },
   "keywords": [
     "async",
@@ -17,10 +17,10 @@
   "author": "Anton Bobrov",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/baverman/async-waterfall-helper/issues"
+    "url": "https://github.com/baverman/async-wh/issues"
   },
-  "homepage": "https://github.com/baverman/async-waterfall-helper",
+  "homepage": "https://github.com/baverman/async-wh",
   "dependencies": {
-    "async": "~0.2.9"
+    "async": "*"
   }
 }
