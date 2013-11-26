@@ -2,6 +2,19 @@
 
 var async = require('async')
 
+Function.prototype.passerr = function (cb, thisobj) {
+    var fn = this
+    return function () {
+        var args = Array.prototype.slice.call(arguments)
+        var err = args.shift()
+        if (err) {
+            cb(err)
+        } else {
+            fn.apply(thisobj, args)
+        }
+    }
+}
+
 module.exports = function waterfallHelper(fn) {
     var obj = {
         tasks: [fn],
@@ -14,7 +27,7 @@ module.exports = function waterfallHelper(fn) {
         }
     }
 
-    setImmediate(function () {
+    process.nextTick(function () {
         async.waterfall(obj.tasks, obj.donecb)
     })
 
