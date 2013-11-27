@@ -23,7 +23,12 @@ module.exports = function waterfallHelper(fn) {
             return this
         },
         done: function (fn) {
-            this.donecb = fn
+            this.donecb = function (err) {
+                if (err === 'done') {
+                    arguments[0] = null
+                }
+                fn.apply(null, arguments)
+            }
         }
     }
 

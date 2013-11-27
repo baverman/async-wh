@@ -44,3 +44,9 @@ W(function (cb) {
         cb(null, val)
     }.passerr(cb))
 }).done(doneF)
+
+W(function (cb) {
+    cb('done', 'good 5')
+}).then(function (val, cb) {
+    // Never reached
+}).done(doneF)

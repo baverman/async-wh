@@ -1,6 +1,6 @@
 {
   "name": "async-wh",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Promise-like syntax for async.waterfall",
   "main": "index.js",
   "scripts": {
