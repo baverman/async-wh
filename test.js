@@ -4,7 +4,7 @@ var assert = require('assert')
 
 var asynch = require('./')
 
-it('thenp should take prevous return value as argument', function (done) {
+it('thenp should take previous return value as argument', function (done) {
     asynch(function (cb) {
         cb(null, 'val')
     }).thenp(function (val, cb) {
