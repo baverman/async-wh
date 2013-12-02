@@ -1,14 +1,14 @@
 {
-  "name": "async-wh",
-  "version": "0.0.4",
-  "description": "Promise-like syntax for async.waterfall",
+  "name": "asynch",
+  "version": "0.1.0",
+  "description": "Promise-like syntax with explicit callbacks for async",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node_modules/.bin/mocha"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/baverman/async-wh.git"
+    "url": "git://github.com/baverman/asynch.git"
   },
   "keywords": [
     "async",
@@ -17,10 +17,13 @@
   "author": "Anton Bobrov",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/baverman/async-wh/issues"
+    "url": "https://github.com/baverman/asynch/issues"
   },
-  "homepage": "https://github.com/baverman/async-wh",
+  "homepage": "https://github.com/baverman/asynch",
   "dependencies": {
     "async": "*"
+  },
+  "devDependencies": {
+    "mocha": "~1.15.0"
   }
 }

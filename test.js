@@ -1,52 +1,85 @@
-var W = require('./')
+'use strict';
 
-function asyncF(result, fail, cb) {
-    if (fail) {
-        cb(fail)
-    } else {
-        cb(null, result)
-    }
-}
+var assert = require('assert')
 
-function doneF(err, result) {
-    if (err) {
-        console.log('Err', err)
-    } else {
-        console.log(result)
-    }
-}
+var asynch = require('./')
 
-W(function (cb) {
-    cb(null, '1 some val')
-}).then(function (val, cb) {
-    asyncF(val, null, cb)
-}).done(doneF)
+it('thenp should take prevous return value as argument', function (done) {
+    asynch(function (cb) {
+        cb(null, 'val')
+    }).thenp(function (val, cb) {
+        assert.equal(val, 'val')
+        cb()
+    }).done(done)
+})
 
-W(function (cb) {
-    cb('err 2')
-}).then(function (val, cb) {
-    // Never reached
-}).done(doneF)
+it('thenp should take several return values as arguments', function (done) {
+    asynch(function (cb) {
+        cb(null, 'val1', 'val2')
+    }).thenp(function (val1, val2, cb) {
+        assert.equal(val1, 'val1')
+        assert.equal(val2, 'val2')
+        cb()
+    }).done(done)
+})
 
-W(function (cb) {
-    cb(null, 'val')
-}).then(function (val, cb) {
-    asyncF('ok', 'fail 3', function (err, val) {
-        if (err) return cb(err)
-        cb(null, val)
+it('thenp should take callback as last argument', function (done) {
+    asynch(function (cb) {
+        cb(null, 'val1', 'val2')
+    }).thenp(function (cb) {
+        cb(null, 'boo', 'foo')
+    }).thenp(function (boo, cb) {
+        cb(null, boo, 'bar')
+    }).donep(function (err, boo, bar) {
+        assert.equal(boo, 'boo')
+        assert.equal(bar, 'bar')
+        done()
     })
-}).done(doneF)
+})
 
-W(function (cb) {
-    cb(null, 'val')
-}).then(function (val, cb) {
-    asyncF('ok', 'fail 4', function (val) {
-        cb(null, val)
-    }.passerr(cb))
-}).done(doneF)
+it('then/done should take result as argument', function (done) {
+    asynch('boo', function (cb) {
+        cb(null, 'val')
+    }).then(function (result, cb) {
+        assert.equal(result.boo, 'val')
+        cb()
+    }).done(function (err, result) {
+        assert.equal(result.boo, 'val')
+        done()
+    })
+})
 
-W(function (cb) {
-    cb('done', 'good 5')
-}).then(function (val, cb) {
-    // Never reached
-}).done(doneF)
+it('unnamed then/thenp should go to _prev', function (done) {
+    asynch(function (cb) {
+        cb(null, 'val')
+    }).then(function (result, cb) {
+        assert.equal(result._prev, 'val')
+        cb()
+    }).done(done)
+})
+
+it('"done" error should return null error in donep', function (done) {
+    asynch(function (cb) {
+        cb('done', 'val')
+    }).then(function (result, cb) {
+        assert(false, 'skip')
+        cb()
+    }).donep(function (err, val) {
+        assert.ifError(err)
+        assert.equal(val, 'val')
+        done()
+    })
+})
+
+it('"done" error should return null error in done', function (done) {
+    asynch(function (cb) {
+        cb('done', 'val')
+    }).then(function (result, cb) {
+        assert(false, 'skip')
+        cb()
+    }).done(function (err, result) {
+        assert.ifError(err)
+        assert.equal(result._prev, 'val')
+        done()
+    })
+})
