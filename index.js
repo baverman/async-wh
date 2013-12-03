@@ -4,7 +4,7 @@ var async = require('async')
 
 Function.prototype.passerr = function (cb, thisobj) {
     var fn = this
-    return function () {
+    return function (err) {
         var args = Array.prototype.slice.call(arguments, 1)
         if (err) {
             cb(err)
