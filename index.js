@@ -5,8 +5,7 @@ var async = require('async')
 Function.prototype.passerr = function (cb, thisobj) {
     var fn = this
     return function () {
-        var args = Array.prototype.slice.call(arguments)
-        var err = args.shift()
+        var args = Array.prototype.slice.call(arguments, 1)
         if (err) {
             cb(err)
         } else {
@@ -15,7 +14,19 @@ Function.prototype.passerr = function (cb, thisobj) {
     }
 }
 
-module.exports = function asynch() {
+Function.prototype.throwerr = function (thisobj) {
+    var fn = this
+    return function (err) {
+        var args = Array.prototype.slice.call(arguments, 1)
+        if (err) {
+            throw(err)
+        } else {
+            fn.apply(thisobj, args)
+        }
+    }
+}
+
+var asynch = module.exports = function asynch(name, fn) {
     var stasks = []
     var ptasks = []
     var result = {}
@@ -35,7 +46,9 @@ module.exports = function asynch() {
                 value = value[0]
             }
 
-            result[name] = value
+            if (name) {
+                result[name] = value
+            }
 
             cb(err)
         }
@@ -78,27 +91,56 @@ module.exports = function asynch() {
             })
             return this
         },
+        parallel: function (name, fn) {
+            if (!fn) {
+                fn = name
+                name = null
+            }
+            ptasks.push(function (cb) {
+                fn.apply(null, makeArgs(fn, makeCallbackWrapper(name, false, cb), false))
+            })
+            return this
+        },
         donep: function (fn) {
             done = function (err) {
                 var args = Array.prototype.slice.call(prevvalue)
-                if (err === 'done') err = null
                 args.unshift(err)
                 fn.apply(null, args)
             }
         },
         done: function (fn) {
             done = function (err) {
-                if (err === 'done') err = null
                 fn(err, result)
             }
         }
     }
 
-    obj.thenp.apply(obj, arguments)
+    if (name) {
+        obj.thenp(name, fn)
+    }
 
     process.nextTick(function () {
-        async.series(stasks, done)
+        if (ptasks.length) {
+            ptasks.push(function (cb) {
+                async.series(stasks, function (err) {
+                    if (err === 'done') err = null
+                    cb(err)
+                })
+            })
+            async.parallel(ptasks, function (err) {
+                done(err)
+            })
+        } else {
+            async.series(stasks, function (err) {
+                if (err === 'done') err = null
+                done(err)
+            })
+        }
     })
 
     return obj
+}
+
+asynch.parallel = function (name, fn) {
+    return asynch().parallel(name, fn)
 }

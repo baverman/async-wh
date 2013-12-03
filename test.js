@@ -83,3 +83,38 @@ it('"done" error should return null error in done', function (done) {
         done()
     })
 })
+
+it('parallel should set named result', function (done) {
+    asynch
+    .parallel('boo', function (cb) {
+        cb(null, 'boo')
+    })
+    .done(function (err, result) {
+        assert.equal(result.boo, 'boo')
+        done()
+    })
+})
+
+it('parallel should run concurently with then tasks', function (done) {
+    asynch('before', function (cb) {
+        setTimeout(function () {
+            cb(null, 'first')
+        }, 10)
+    })
+    .then('after', function (cb) {
+        setTimeout(function () {
+            cb(null, 'second')
+        }, 30)
+    })
+    .parallel(function (result, cb) {
+        setTimeout(function () {
+            assert.equal(result.before, 'first')
+            assert(!result.after)
+            cb()
+        }, 20)
+    })
+    .done(function (err, result) {
+        assert.equal(result.after, 'second')
+        done()
+    })
+})
