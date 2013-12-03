@@ -27,12 +27,23 @@ Function.prototype.throwerr = function (thisobj) {
 }
 
 var asynch = module.exports = function asynch(name, fn) {
-    var stasks = []
-    var ptasks = []
+    var chunks = []
+    var currentChunk = null
+
     var result = {}
     var done
     var prevvalue = [null]
-    var anynames = false
+
+    function addTask(type, push, task) {
+        if (!currentChunk || currentChunk.type != type) {
+            currentChunk = {type: type, tasks: []}
+            chunks.push(currentChunk)
+        }
+
+        if (push) {
+            currentChunk.tasks.push(task)
+        }
+    }
 
     function makeCallbackWrapper(name, saveInPrev, cb) {
         return function (err) {
@@ -76,7 +87,8 @@ var asynch = module.exports = function asynch(name, fn) {
                 fn = name
                 name = '_prev'
             }
-            stasks.push(function (cb) {
+
+            addTask('series', fn, function (cb) {
                 fn.apply(null, makeArgs(fn, makeCallbackWrapper(name, true, cb), true))
             })
             return this
@@ -86,7 +98,8 @@ var asynch = module.exports = function asynch(name, fn) {
                 fn = name
                 name = '_prev'
             }
-            stasks.push(function (cb) {
+
+            addTask('series', fn, function (cb) {
                 fn.apply(null, makeArgs(fn, makeCallbackWrapper(name, true, cb), false))
             })
             return this
@@ -96,7 +109,8 @@ var asynch = module.exports = function asynch(name, fn) {
                 fn = name
                 name = null
             }
-            ptasks.push(function (cb) {
+
+            addTask('parallel', fn, function (cb) {
                 fn.apply(null, makeArgs(fn, makeCallbackWrapper(name, false, cb), false))
             })
             return this
@@ -115,27 +129,23 @@ var asynch = module.exports = function asynch(name, fn) {
         }
     }
 
-    if (name) {
-        obj.thenp(name, fn)
-    }
+    obj.thenp(name, fn)
 
     process.nextTick(function () {
-        if (ptasks.length) {
-            ptasks.push(function (cb) {
-                async.series(stasks, function (err) {
-                    if (err === 'done') err = null
-                    cb(err)
-                })
-            })
-            async.parallel(ptasks, function (err) {
-                done(err)
-            })
-        } else {
-            async.series(stasks, function (err) {
-                if (err === 'done') err = null
-                done(err)
-            })
-        }
+        async.eachSeries(chunks, function (chunk, cb) {
+            if (chunk.tasks.length) {
+                if (chunk.type === 'series') {
+                    async.series(chunk.tasks, function (err) {
+                        if (err === 'done') err = null
+                        cb(err)
+                    })
+                } else if (chunk.type === 'parallel') {
+                    async.parallel(chunk.tasks, cb)
+                }
+            } else {
+                cb()
+            }
+        }, done)
     })
 
     return obj

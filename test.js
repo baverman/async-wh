@@ -95,26 +95,55 @@ it('parallel should set named result', function (done) {
     })
 })
 
-it('parallel should run concurently with then tasks', function (done) {
-    asynch('before', function (cb) {
+it('parallel should run concurently', function (done) {
+    var tm = process.hrtime()
+    asynch
+    .parallel('before', function (cb) {
         setTimeout(function () {
             cb(null, 'first')
         }, 10)
+    })
+    .parallel(function (result, cb) {
+        setTimeout(function () {
+            var ms = process.hrtime(tm)[1] / 1000000
+            assert(ms > 18)
+            assert(ms < 23)
+            assert.equal(result.before, 'first')
+            assert(!result.after)
+            cb()
+        }, 20)
     })
     .then('after', function (cb) {
         setTimeout(function () {
             cb(null, 'second')
         }, 30)
     })
-    .parallel(function (result, cb) {
-        setTimeout(function () {
-            assert.equal(result.before, 'first')
-            assert(!result.after)
-            cb()
-        }, 20)
-    })
     .done(function (err, result) {
         assert.equal(result.after, 'second')
         done()
     })
+})
+
+it('parallel sync points should wait prevous chunk to complete', function (done) {
+    asynch
+    .parallel('foo', function (cb) {
+        setTimeout(function () {
+            cb(null, 'foo')
+        }, 10)
+    })
+    .parallel('bar', function (cb) {
+        setTimeout(function () {
+            cb(null, 'bar')
+        }, 10)
+    })
+    .then()
+    .parallel(function (result, cb) {
+        assert.equal(result.foo, 'foo')
+        cb()
+    })
+    .parallel(function (result, cb) {
+        assert.equal(result.bar, 'bar')
+        cb()
+    })
+    .done(done)
 })
