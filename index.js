@@ -47,12 +47,14 @@ var asynch = module.exports = function asynch(name, fn) {
                 prevvalue = value
             }
 
-            if (value.length === 1) {
-                value = value[0]
-            }
+            if (value.length) {
+                if (value.length === 1) {
+                    value = value[0]
+                }
 
-            if (name) {
-                result[name] = value
+                if (name) {
+                    result[name] = value
+                }
             }
 
             cb(err)

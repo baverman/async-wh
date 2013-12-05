@@ -184,3 +184,17 @@ it('sync points with callbacks should wait for its finish', function (done) {
         cb()
     }).done(done)
 })
+
+it('callback null values', function (done) {
+    asynch
+    .then('boo', function (cb) {
+        cb()
+    })
+    .then('foo', function (cb) {
+        cb(null, null)
+    }).done(function (err, result) {
+        assert(result.boo === undefined)
+        assert(result.foo === null)
+        done()
+    })
+})
