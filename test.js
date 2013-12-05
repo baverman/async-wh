@@ -146,3 +146,41 @@ it('sync points should wait prevous chunk to complete', function (done) {
     })
     .done(done)
 })
+
+it('static then', function (done) {
+    asynch
+    .then(function (cb) {
+        cb(null, 'boo')
+    })
+    .donep(function (err, value) {
+        assert.equal(value, 'boo')
+        done()
+    })
+})
+
+it('sync points with callbacks should wait for its finish', function (done) {
+    asynch
+    .parallel('boo', function (cb) {
+        setTimeout(function () {
+            cb(null, 'boo')
+        }, 10)
+    })
+    .parallel('foo', function (cb) {
+        setTimeout(function () {
+            cb(null, 'foo')
+        }, 10)
+    })
+    .sync('bar', function (result, cb) {
+        assert.equal(result.boo, 'boo')
+        assert.equal(result.foo, 'foo')
+        setTimeout(function () {
+            cb(null, 'bar')
+        }, 10)
+    })
+    .parallel(function (result, cb) {
+        assert.equal(result.boo, 'boo')
+        assert.equal(result.foo, 'foo')
+        assert.equal(result.bar, 'bar')
+        cb()
+    }).done(done)
+})

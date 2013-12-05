@@ -34,6 +34,11 @@ var asynch = module.exports = function asynch(name, fn) {
     var done
     var prevvalue = [null]
 
+    function addChunk() {
+        currentChunk = {series:[], parallel:[]}
+        chunks.push(currentChunk)
+    }
+
     function makeCallbackWrapper(name, saveInPrev, cb) {
         return function (err) {
             var value = Array.prototype.slice.call(arguments, 1)
@@ -104,9 +109,20 @@ var asynch = module.exports = function asynch(name, fn) {
             })
             return this
         },
-        sync: function () {
-            currentChunk = {series:[], parallel:[]}
-            chunks.push(currentChunk)
+        sync: function (name, fn) {
+            addChunk()
+            if (name) {
+                this.then(name, fn)
+                addChunk()
+            }
+            return this
+        },
+        syncp: function (name, fn) {
+            addChunk()
+            if (name) {
+                this.thenp(name, fn)
+                addChunk()
+            }
             return this
         },
         donep: function (fn) {
@@ -164,4 +180,8 @@ var asynch = module.exports = function asynch(name, fn) {
 
 asynch.parallel = function (name, fn) {
     return asynch().parallel(name, fn)
+}
+
+asynch.then = function (name, fn) {
+    return asynch().then(name, fn)
 }
