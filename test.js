@@ -97,8 +97,7 @@ it('parallel should set named result', function (done) {
 
 it('parallel should run concurently', function (done) {
     var tm = process.hrtime()
-    asynch
-    .parallel('before', function (cb) {
+    asynch('before', function (cb) {
         setTimeout(function () {
             cb(null, 'first')
         }, 10)
@@ -124,7 +123,7 @@ it('parallel should run concurently', function (done) {
     })
 })
 
-it('parallel sync points should wait prevous chunk to complete', function (done) {
+it('sync points should wait prevous chunk to complete', function (done) {
     asynch
     .parallel('foo', function (cb) {
         setTimeout(function () {
@@ -136,7 +135,7 @@ it('parallel sync points should wait prevous chunk to complete', function (done)
             cb(null, 'bar')
         }, 10)
     })
-    .then()
+    .sync()
     .parallel(function (result, cb) {
         assert.equal(result.foo, 'foo')
         cb()
