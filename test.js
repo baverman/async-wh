@@ -198,3 +198,50 @@ it('callback null values', function (done) {
         done()
     })
 })
+
+it('use should change passed result', function (done) {
+    asynch
+    .then(function (result, cb) {
+        asynch.use(result, cb)
+        .then('boo', function (cb) {
+            cb(null, 'boo')
+        })
+    })
+    .then(function(result, cb) {
+        assert.equal(result.boo, 'boo')
+        cb()
+    })
+    .done(done)
+})
+
+it('use should take single callback argument', function (done) {
+    asynch
+    .then(function (result, cb) {
+        asynch.use(cb)
+        .then(function (cb) {
+            result.boo = 'boo'
+            cb()
+        })
+    })
+    .then(function(result, cb) {
+        assert.equal(result.boo, 'boo')
+        cb()
+    })
+    .done(done)
+})
+
+it('use should take single result argument', function (done) {
+    asynch
+    .then(function (result, cb) {
+        asynch.use(result)
+        .then('boo', function (cb) {
+            cb(null, 'boo')
+        })
+        .done(cb)
+    })
+    .then(function(result, cb) {
+        assert.equal(result.boo, 'boo')
+        cb()
+    })
+    .done(done)
+})

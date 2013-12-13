@@ -138,6 +138,21 @@ var asynch = module.exports = function asynch(name, fn) {
             done = function (err) {
                 fn(err, result)
             }
+        },
+        use: function (res, callback) {
+            if (!callback) {
+                if (typeof(res) === 'function') {
+                    callback = res
+                    res = null
+                }
+            }
+
+            if (res) {
+                result = res
+            }
+
+            this.done(callback)
+            return this
         }
     }
 
@@ -186,4 +201,8 @@ asynch.parallel = function (name, fn) {
 
 asynch.then = function (name, fn) {
     return asynch().then(name, fn)
+}
+
+asynch.use = function (result, callback) {
+    return asynch().use(result, callback)
 }
