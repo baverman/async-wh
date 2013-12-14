@@ -77,6 +77,17 @@ var asynch = module.exports = function asynch(name, fn) {
         return args
     }
 
+    function pushFunc(fn, type, name, saveInPrev, usePrev) {
+        if (fn) currentChunk[type].push(function (cb) {
+            var callback = makeCallbackWrapper(name, saveInPrev, cb)
+            try {
+                fn.apply(null, makeArgs(fn, callback, usePrev))
+            } catch (err) {
+                callback(err)
+            }
+        })
+    }
+
     var obj = {
         thenp: function (name, fn) {
             if (!fn) {
@@ -84,9 +95,7 @@ var asynch = module.exports = function asynch(name, fn) {
                 name = '_prev'
             }
 
-            if (fn) currentChunk.series.push(function (cb) {
-                fn.apply(null, makeArgs(fn, makeCallbackWrapper(name, true, cb), true))
-            })
+            pushFunc(fn, 'series', name, true, true)
             return this
         },
         then: function (name, fn) {
@@ -95,9 +104,7 @@ var asynch = module.exports = function asynch(name, fn) {
                 name = '_prev'
             }
 
-            if (fn) currentChunk.series.push(function (cb) {
-                fn.apply(null, makeArgs(fn, makeCallbackWrapper(name, true, cb), false))
-            })
+            pushFunc(fn, 'series', name, true, false)
             return this
         },
         parallel: function (name, fn) {
@@ -106,9 +113,7 @@ var asynch = module.exports = function asynch(name, fn) {
                 name = null
             }
 
-            if (fn) currentChunk.parallel.push(function (cb) {
-                fn.apply(null, makeArgs(fn, makeCallbackWrapper(name, false, cb), false))
-            })
+            pushFunc(fn, 'parallel', name, false, false)
             return this
         },
         sync: function (name, fn) {

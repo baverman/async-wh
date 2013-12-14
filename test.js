@@ -245,3 +245,14 @@ it('use should take single result argument', function (done) {
     })
     .done(done)
 })
+
+it('asynch should catch exceptions', function (done) {
+    asynch
+    .then(function (cb) {
+        throw new Error('boo')
+    })
+    .done(function (err) {
+        assert.equal(err.message, 'boo')
+        done()
+    })
+})
