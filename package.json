@@ -1,6 +1,6 @@
 {
   "name": "asynch",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Promise-like syntax with explicit callbacks for async",
   "main": "index.js",
   "scripts": {
