@@ -256,3 +256,23 @@ it('asynch should catch exceptions', function (done) {
         done()
     })
 })
+
+it('thenp should save named result', function (done) {
+    asynch
+    .then('one', function (cb) {
+        cb(null, 1)
+    })
+    .thenp('two', function(one, cb) {
+        cb(null, one + 1)
+    })
+    .thenp('three', function(two, cb) {
+        cb(null, two + 1)
+    })
+    .then(function (result, cb) {
+        assert.equal(result.one, 1)
+        assert.equal(result.two, 2)
+        assert.equal(result.three, 3)
+        cb()
+    })
+    .done(done)
+})
